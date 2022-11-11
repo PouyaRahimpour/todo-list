@@ -38,7 +38,6 @@ class DatabaseHandler:
         try:
             with self._db_path.open("r") as db:
                 try:
-                    print(list(LinkedList(json.load(db))))
                     return DBResponse(LinkedList(json.load(db)), SUCCESS)
                 except json.JSONDecodeError:
                     return DBResponse(LinkedList(), JSON_ERROR)
@@ -46,9 +45,7 @@ class DatabaseHandler:
             return DBResponse(LinkedList(), DB_READ_ERROR)
     
     def write_todos(self, todo_list: LinkedList) -> DBResponse:
-        todo_list = list(todo_list)
         try:
-            print(list(todo_list))
             with self._db_path.open("w") as db:
                 json.dump(list(todo_list), db, indent=4)
             return DBResponse(todo_list, SUCCESS)

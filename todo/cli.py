@@ -98,7 +98,7 @@ def add(
         tags=tags,
         )
 
-    todo, error = todoer.add(task)
+    task, error = todoer.add(task)
     if error:
         typer.secho(
             f'Adding task filed with "{ERRORS[error]}"',
@@ -111,6 +111,7 @@ def add(
             f"""with priority: {task.priority.name}""",
             fg = typer.colors.GREEN,
         )
+
     
 
 @app.command(name="list")

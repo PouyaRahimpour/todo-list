@@ -30,6 +30,7 @@ class Todoer:
             return CurrentTodo(task, read.error)
 
         read.todo_list.add_last(todo)
+        print(read.todo_list)
         write = self._dbhandler.write_todos(read.todo_list)
         return CurrentTodo(task, write.error)
 
