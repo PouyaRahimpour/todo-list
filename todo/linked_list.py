@@ -11,11 +11,11 @@ class Node:
 
 class LinkedList:
 
-    def __init__(self, name: str, nodes: List[Any]=None) -> None:
+    def __init__(self, nodes: List[Any]=None) -> None:
         self._head = None
         self._tail = None
         self._size = 0
-        self.name = name
+    
         if nodes is not None:
             self._size = len(nodes)
             node = Node(data=nodes.pop(0))
@@ -24,14 +24,16 @@ class LinkedList:
                 node.next = Node(data=element)
                 self._tail = node = node.next
 
-    def add_first(self, node: Node) -> None:
+    def add_first(self, data: Any) -> None:
+        node = Node(data)
         if self._size == 0:
             self._tail = node
         node.next = self._head
         self._head = node
         self._size += 1
 
-    def add_last(self, node: Node) -> None:
+    def add_last(self, data: Any) -> None:
+        node = Node(Any)
         if self._size == 0:
             self._head = node
         node.next = None
@@ -62,7 +64,7 @@ class LinkedList:
         node = self._head
         nodes = []
         while node is not None:
-            nodes.append(node.data)
+            nodes.append(str(node.data))
             node = node.next
         nodes.append("None")
         return " -> ".join(nodes)
@@ -70,5 +72,5 @@ class LinkedList:
     def __iter__(self) -> None:
         node = self._head
         while node is not None:
-            yield node
+            yield node.data
             node = node.next

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import NamedTuple
+
 from enum import Enum
 
 
@@ -17,6 +17,8 @@ class Task:
         self.priority = priority
         self.due_date = due_date
         self.note = note
-        self.created_date: datetime.now()
+        self.created_date = str(datetime.now())
         self.done = False
         
+    def __repr__(self) -> str:
+        return f"Task({self.name}, priority={self.priority.name}, due_date={str(self.due_date)}, note={self.note}, steps={str(self.steps)}, tags={str(self.tags)}"

@@ -2,7 +2,7 @@
 from typing import Optional, List
 
 import typer
-from task import Task, Priority
+from todo.task import Task, Priority
 
 from todo import (
     __app_name__, __version__, ERRORS, config, database, todo
@@ -85,6 +85,7 @@ def add(
     note: str = typer.Option("...", "--note", "-n"),
     due_date: str = typer.Option("", "--due-date", "-d"),
     steps: list[str] = typer.Option([], "--steps", "-s"),
+    # steps: list[str] = typer.Argument(..., "--step", "-s"),
     tags: list[str] =  typer.Option([], "--tag", "-t"),
 ) -> None:
     todoer = get_todoer()
@@ -96,6 +97,7 @@ def add(
         steps=steps,
         tags=tags,
         )
+
     todo, error = todoer.add(task)
     if error:
         typer.secho(

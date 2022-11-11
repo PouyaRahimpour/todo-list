@@ -6,7 +6,9 @@ import json
 
 from typing import Any, Dict, List, NamedTuple
 
-from todo import DB_WRITE_ERROR, SUCCESS, DB_READ_ERROR, JSON_ERROR, linked_list
+
+from todo import DB_WRITE_ERROR, SUCCESS, DB_READ_ERROR, JSON_ERROR
+from todo.linked_list import LinkedList
 
 DEFAULT_DB_PATH = Path.home().joinpath(
     "." + Path.home().stem + "_todo.json"
@@ -25,7 +27,7 @@ def init_database(db_path: Path) -> int:
         return DB_WRITE_ERROR
 
 class DBResponse(NamedTuple):
-    todo_list: linked_list[dict[str: Any]]
+    todo_list: LinkedList
     error : int
 
 class DatabaseHandler:
@@ -36,16 +38,19 @@ class DatabaseHandler:
         try:
             with self._db_path.open("r") as db:
                 try:
-                    return DBResponse(json.load(db), SUCCESS)
+                    print(list(LinkedList(json.load(db))))
+                    return DBResponse(LinkedList(json.load(db)), SUCCESS)
                 except json.JSONDecodeError:
-                    return DBResponse([], JSON_ERROR)
+                    return DBResponse(LinkedList(), JSON_ERROR)
         except OSError:
-            return DBResponse([], DB_READ_ERROR)
+            return DBResponse(LinkedList(), DB_READ_ERROR)
     
-    def write_todos(self, todo_list: linked_list[dict[str: Any]]) -> DBResponse:
+    def write_todos(self, todo_list: LinkedList) -> DBResponse:
+        todo_list = list(todo_list)
         try:
+            print(list(todo_list))
             with self._db_path.open("w") as db:
-                json.dump(todo_list, db, indent=4)
+                json.dump(list(todo_list), db, indent=4)
             return DBResponse(todo_list, SUCCESS)
         except OSError:
             return DBResponse(todo_list, DB_WRITE_ERROR)
