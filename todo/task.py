@@ -17,7 +17,7 @@ class Task:
         self.priority = priority
         self.due_date = due_date
         self.note = note
-        self.created_date = str(datetime.now())
+        self.created_date = str(datetime.date(datetime.now()))
         self.done = False
         
     def __repr__(self) -> str:

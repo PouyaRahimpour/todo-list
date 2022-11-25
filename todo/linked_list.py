@@ -43,8 +43,17 @@ class LinkedList:
         self._tail = node
         self._size += 1
 
-    def remove_node(self, target_node_data:Any) -> None:
-        if self._head is None:
+    def is_empty(self) -> bool:
+        return self._head is None
+
+    def remove_first(self) -> None:
+        if self.is_empty():
+            raise Exception("List is empty")
+        self._head = self._head.next
+        self._size -= 1
+        
+    def remove_node_with_data(self, target_node_data:Any) -> None:
+        if self.is_empty():
             raise Exception("List is empty")
 
         if self._head.data == target_node_data:
@@ -62,6 +71,30 @@ class LinkedList:
                 return
             previous_node = node
         raise Exception(f'Node with data "{target_node_data}" not found')
+    
+    def remove_node(self, index:int) -> None:
+        if self.is_empty():
+            raise Exception("List is empty")
+
+        if index < 0 or index > self._size:
+            raise IndexError
+            
+        if index == 0:
+            node = self._head
+            self.remove_first()
+            return node.data
+        
+        previous_node = self._head
+        node = previous_node.next
+        for i in range(index-1):
+            previous_node = node
+            node = node.next
+        if node is self._tail:
+            self._tail = previous_node
+        previous_node.next = node.next
+
+        self._size -= 1
+        return node.data
 
     # def list_of(self) -> list:
     #     node = self._head
@@ -70,7 +103,22 @@ class LinkedList:
     #         nodes.append(node.data)
     #         node = node.next
     #     return nodes
+
         
+
+
+    def __getitem__(self, index: int) -> Any:
+        if index < 0 or index > self._size:
+            raise IndexError
+        tmp = self._head
+        for i in range(index):
+            tmp = tmp.next
+        if tmp is None:
+            raise IndexError
+        return tmp.data
+
+    def __len__(self) -> int:
+        return self._size
 
     def __repr__(self) -> str:
         node = self._head

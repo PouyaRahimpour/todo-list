@@ -1,5 +1,5 @@
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import typer
 from todo.task import Task, Priority
@@ -39,7 +39,6 @@ def init(
     else:
         typer.secho(f"The todo database is {db_path}", fg=typer.colors.GREEN)
     
-
 def get_todoer() -> todo.Todoer:
     if config.CONFIG_FILE_PATH.exists():
         db_path = database.get_database_path(config.CONFIG_FILE_PATH)
@@ -82,11 +81,10 @@ def main(
 def add(
     name: str = typer.Argument(...),
     priority: int = typer.Option(2, "--priority", "-p", min=1, max=3),
-    note: str = typer.Option("...", "--note", "-n"),
-    due_date: str = typer.Option("", "--due-date", "-d"),
-    steps: list[str] = typer.Option([], "--steps", "-s"),
-    # steps: list[str] = typer.Argument(..., "--step", "-s"),
-    tags: list[str] =  typer.Option([], "--tag", "-t"),
+    note: str = typer.Option("no notes", "--note", "-n"),
+    due_date: str = typer.Option("unknown", "--due-date", "-d"),
+    steps: str = typer.Option("", prompt="Add steps"),
+    tags: str = typer.Option("", prompt="Add tags")
 ) -> None:
     todoer = get_todoer()
     task = Task(
@@ -94,11 +92,11 @@ def add(
         priority=Priority(priority),
         due_date=due_date,
         note=note,
-        steps=steps,
-        tags=tags,
+        steps=steps.split(),
+        tags=tags.split(),
         )
 
-    task, error = todoer.add(task)
+    todo, error = todoer.add(task)
     if error:
         typer.secho(
             f'Adding task filed with "{ERRORS[error]}"',
@@ -111,40 +109,59 @@ def add(
             f"""with priority: {task.priority.name}""",
             fg = typer.colors.GREEN,
         )
-
     
-
 @app.command(name="list")
-def list_all() -> None:
-    todoer = get_todoer()
-    todo_list = todoer.get_todo_list()
+def list_all(tag:Optional[str] = typer.Option(None, "--find", "-f")) -> None:
+    todoer = get_todoer();
+    todo_list = todoer.get_todo_list(tag)
     if len(todo_list) == 0:
-        typer.secho(
-            "There are no tasks in the todo list yet", fg=typer.colors.RED
-        )
+        if tag is None:
+            typer.secho(
+                "There are no tasks in the todo list yet", fg=typer.colors.RED
+            )
+        else:
+            typer.secho(
+                "No todo with this tag was found.", fg=typer.colors.RED
+            )
         raise typer.Exit()
-    typer.secho(
-        "\ntodo list:\n", fg=typer.colors.BLUE, bold=True,
-    )
+    if tag is None:
+        typer.secho(
+            "\ntodo list:\n", fg=typer.colors.YELLOW, bold=True,
+        )
+    else:
+        typer.secho(
+            f"\ntodo list: #{tag}\n", fg=typer.colors.YELLOW, bold=True,
+        )
     columns = (
-        "ID.  ",
-        "| Priority  ",
-        "| Done  ",
-        "| Description  ",
+        " ID.   ",
+        "|      Name      ",
+        "| Priority ",
+        "|  Done  ",
+        "| Created Date ",
+        "| Due Date   "
     )
     headers = "".join(columns)
-    typer.secho(headers, fg=typer.colors.BLUE, bold=True)
-    typer.secho("-"*len(headers), fg=typer.colors.BLUE)
+    typer.secho(headers, fg=typer.colors.MAGENTA, bold=True)
+    typer.secho("-"*len(headers), fg=typer.colors.MAGENTA)
     for id, todo in enumerate(todo_list, 1):
-        describe, priority, done = todo.values()
+        name, priority, done, note, steps, created_date, due_date, tags = todo.values()
         typer.secho(
             f"{id}{(len(columns[0]) - len(str(id))) * ' '}"
-            f"| ({priority}){(len(columns[1]) - len(str(priority)) - 4)* ' '}"
-            f"| {done}{(len(columns[2]) - len(str(done)) - 2) * ' '}"
-            f"| {describe}",
+            f"| {name}{(len(columns[1]) - len(str(name)) -2) * ' '}"
+            f"| ({priority}){(len(columns[2]) - len(str(priority)) -4)* ' '}"
+            f"| {done}{(len(columns[3]) - len(str(done)) -2) * ' '}"
+            f"| {created_date}{(len(columns[4]) - len(str(created_date)) -2) * ' '}"
+            f"| {due_date}{(len(columns[5]) - len(str(due_date))) * ' '}\n\n"
+            f"Note:{(len(columns[0]) - 6) * ' '}"
+            f" {note}\n\n"
+            f"Steps:{(len(columns[0]) - 7) * ' '}"
+            f" {steps}\n\n"
+            f"Tags:{(len(columns[0]) - 6) * ' '}"
+            f" {tags}\n"
+            ,
             fg=typer.colors.BLUE,
         )
-    typer.secho("-" * len(headers) + "\n", fg=typer.colors.BLUE)
+        typer.secho("-" * len(headers) + "\n", fg=typer.colors.MAGENTA)
 
 
 @app.command(name="complete")
@@ -159,7 +176,7 @@ def set_done(todo_id: int = typer.Argument(...)) -> None:
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""to-do # {todo_id} "{todo['Description']}" completed!""",
+            f"""to-do # {todo_id} "{todo['Name']}" completed!""",
             fg=typer.colors.GREEN,
         )
 
@@ -185,7 +202,7 @@ def remove(
             raise typer.Exit(1)
         else:
             typer.secho(
-                f"""to-do # {todo_id}: '{todo["Description"]}' was removed""",
+                f"""to-do # {todo_id}: '{todo["Name"]}' was removed""",
                 fg=typer.colors.GREEN,
             )
     
@@ -199,7 +216,7 @@ def remove(
             typer.secho("Invalid TODO_ID", fg=typer.colors.RED)
             raise typer.Exit(1)
         delete = typer.confirm(
-            f"Delete todo # {todo_id}: {todo['Description']}?"
+            f"Delete todo # {todo_id}: {todo['Name']}?"
         )
 
         if delete:
@@ -228,3 +245,39 @@ def remove_all(
             typer.secho("All todos were removed", fg = typer.colors.GREEN)
     else:
         typer.secho("Operation canceled")
+
+# @app.command(name="find")
+# def search(tag:str = typer.Argument(...)) -> None:
+#     todoer = get_todoer()
+#     todo, error = todoer.search(tag)
+#     if error:
+#         typer.secho()
+#     else:
+#         typer.secho()
+
+@app.command(name="edit")
+def change_todo(
+    todo_id:int = typer.Argument(...),
+    name: Optional[str] = typer.Option(None, "--name", "-n"),
+    priority: Optional[int] = typer.Option(None, "--priority", "-p", min=1, max=3),
+    note: Optional[str] = typer.Option(None, "--note", "-n"),
+    due_date: Optional[str] = typer.Option(None, "--due-date", "-d"),
+    steps:Optional[str] = typer.Option(None, prompt="Add steps"),
+    tags:Optional[str] = typer.Option(None, prompt="Add tags")
+    ) -> None:
+    todoer = get_todoer()
+    task = Task(name, priority, due_date, note, steps, tags)
+    todo, error = todoer.change_todo(todo_id, task)
+    if error:
+        typer.secho(
+            f'Changing to-do # "{todo_id}" failed with "{ERRORS[error]}"',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+    else:
+        typer.secho(
+            f"""to-do # {todo_id} "{todo['Name']}" changed!""",
+            fg=typer.colors.GREEN,
+        )
+
+
