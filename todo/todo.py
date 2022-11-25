@@ -6,16 +6,19 @@ from todo import DB_READ_ERROR, ID_ERROR
 from todo.database import DatabaseHandler
 from todo.task import Task
 from todo.linked_list import LinkedList
+
+
 class CurrentTodo(NamedTuple):
     todo: Task
     error: int
 
+
 class Todoer:
     def __init__(self, db_path: Path) -> None:
         self._dbhandler = DatabaseHandler(db_path)
-    
+
     def add(self, task: Task) -> CurrentTodo:
-       
+
         todo = {
             "Name": task.name,
             "Priority": task.priority.name,
@@ -34,20 +37,20 @@ class Todoer:
         write = self._dbhandler.write_todos(read.todo_list)
         return CurrentTodo(task, write.error)
 
-    def get_todo_list(self, tag:Optional[str]) -> LinkedList:
+    def get_todo_list(self, tag: Optional[str]) -> LinkedList:
         todo_list, error = self._dbhandler.read_todos()
         if tag is not None:
             for todo in todo_list:
                 found = False
                 for t in todo["Tags"]:
                     if t == tag:
-                        found = True 
+                        found = True
                         break
                 if not found:
-                    todo_list.remove_node_with_data(todo) 
-       
+                    todo_list.remove_node_with_data(todo)
+
         return todo_list
-    
+
     def set_done(self, todo_id: int) -> CurrentTodo:
         read = self._dbhandler.read_todos()
         if read.error:
@@ -59,7 +62,7 @@ class Todoer:
         todo["Done"] = True
         write = self._dbhandler.write_todos(read.todo_list)
         return CurrentTodo(todo, write.error)
-    
+
     def remove(self, todo_id: int) -> CurrentTodo:
         read = self._dbhandler.read_todos()
         if read.error:
@@ -75,7 +78,7 @@ class Todoer:
         write = self._dbhandler.write_todos([])
         return CurrentTodo({}, write.error)
 
-    def change_todo(self, todo_id:int, task:Task) -> CurrentTodo:
+    def change_todo(self, todo_id: int, task: Task) -> CurrentTodo:
         read = self._dbhandler.read_todos()
         if read.error:
             return CurrentTodo({}, read.error)

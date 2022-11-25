@@ -1,13 +1,14 @@
-from typing import Any,List
+from typing import Any, List
 
 
 class Node:
-    def __init__(self, data:Any) -> None:
+    def __init__(self, data: Any) -> None:
         self.data = data
         self.next = None
+
     def __repr__(self) -> str:
         return self.data
-    
+
 
 class LinkedList:
 
@@ -15,7 +16,7 @@ class LinkedList:
         self._head = None
         self._tail = None
         self._size = 0
-    
+
         if nodes != []:
             self._size = len(nodes)
             node = Node(data=nodes.pop(0))
@@ -24,7 +25,7 @@ class LinkedList:
                 node.next = Node(data=element)
                 node = node.next
                 self._tail = node
-  
+
     def add_first(self, data: Any) -> None:
         node = Node(data)
         if self._size == 0:
@@ -51,8 +52,8 @@ class LinkedList:
             raise Exception("List is empty")
         self._head = self._head.next
         self._size -= 1
-        
-    def remove_node_with_data(self, target_node_data:Any) -> None:
+
+    def remove_node_with_data(self, target_node_data: Any) -> None:
         if self.is_empty():
             raise Exception("List is empty")
 
@@ -60,7 +61,7 @@ class LinkedList:
             self._head = self._head.next
             self._size -= 1
             return
-        
+
         previous_node = self._head
         for node in self:
             if node.data == target_node_data:
@@ -71,19 +72,19 @@ class LinkedList:
                 return
             previous_node = node
         raise Exception(f'Node with data "{target_node_data}" not found')
-    
-    def remove_node(self, index:int) -> None:
+
+    def remove_node(self, index: int) -> None:
         if self.is_empty():
             raise Exception("List is empty")
 
         if index < 0 or index > self._size:
             raise IndexError
-            
+
         if index == 0:
             node = self._head
             self.remove_first()
             return node.data
-        
+
         previous_node = self._head
         node = previous_node.next
         for i in range(index-1):
@@ -103,9 +104,6 @@ class LinkedList:
     #         nodes.append(node.data)
     #         node = node.next
     #     return nodes
-
-        
-
 
     def __getitem__(self, index: int) -> Any:
         if index < 0 or index > self._size:
@@ -128,7 +126,7 @@ class LinkedList:
             node = node.next
         nodes.append("None")
         return " -> ".join(nodes)
-        
+
     def __iter__(self) -> None:
         node = self._head
         while node is not None:

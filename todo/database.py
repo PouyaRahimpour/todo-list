@@ -14,10 +14,12 @@ DEFAULT_DB_PATH = Path.home().joinpath(
     "." + Path.home().stem + "_todo.json"
 )
 
+
 def get_database_path(config_file: Path) -> Path:
     config_parser = configparser.ConfigParser()
     config_parser.read(config_file)
     return Path(config_parser["General"]["database"])
+
 
 def init_database(db_path: Path) -> int:
     try:
@@ -26,9 +28,11 @@ def init_database(db_path: Path) -> int:
     except OSError:
         return DB_WRITE_ERROR
 
+
 class DBResponse(NamedTuple):
     todo_list: LinkedList
-    error : int
+    error: int
+
 
 class DatabaseHandler:
     def __init__(self, db_path: Path) -> None:
@@ -43,7 +47,7 @@ class DatabaseHandler:
                     return DBResponse(LinkedList(), JSON_ERROR)
         except OSError:
             return DBResponse(LinkedList(), DB_READ_ERROR)
-    
+
     def write_todos(self, todo_list: LinkedList) -> DBResponse:
         try:
             with self._db_path.open("w") as db:
